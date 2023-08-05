@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Casa de apostas - Obarbosa</title>
+    <style>
+        body {
+            font-family: "Arial", sans-serif; 
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+            background-color: #4da1ff; 
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            text-align: center; 
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        input {
+            width: 100%;
+            max-width: 300px; 
+            padding: 10px;
+            font-size: 16px;
+            margin-bottom: 15px; 
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #007bff; 
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px; 
+        }
+
+        #resultado {
+            margin-top: 20px;
+            font-weight: bold; 
+        }
+
+        
+        #modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        #modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        }
+
+        
+        #contador-ganhos {
+            color: green;
+            font-weight: bold;
+        }
+
+        #contador-perdas {
+            color: red;
+            font-weight: bold; 
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 style="text-align: center;">Casa de Apostas   Obarbosa</h1>
+        <label for="valor">Valor da Aposta:</label>
+        <input type="number" id="valor" required>
+        <label for="tipo">Tipo de Aposta:</label>
+        <select id="tipo" required>
+            <option value="paridade">Paridade</option>
+        </select>
+        <button onclick="realizarAposta()">Apostar</button>
+        <div id="resultado"></div>
+
+        <p style="text-align: center;">Contador de Ganhos: <span id="contador-ganhos">0</span></p>
+        <p style="text-align: center;">Contador de Perdas: <span id="contador-perdas">0</span></p>
+    </div>
+
+    <!-- Modal -->
+    <div id="modal">
+        <div id="modal-content">
+            <p>Número Sorteado: <span id="modal-numeroSorteado"></span></p>
+            <p>Resultado: <span id="modal-resultado"></span></p>
+            <p>Ganho: R$ <span id="modal-ganho"></span></p>
+            <button onclick="fecharModal()">Fechar</button>
+        </div>
+    </div>
+
+    <script>
+       
+        let contadorGanhos = 0;
+        let contadorPerdas = 0;
+
+        
+        function atualizarContadores() {
+            const contadorGanhosSpan = document.getElementById('contador-ganhos');
+            const contadorPerdasSpan = document.getElementById('contador-perdas');
+
+            contadorGanhosSpan.textContent = contadorGanhos;
+            contadorPerdasSpan.textContent = contadorPerdas;
+        }
+
+        
+        function exibirModal(data) {
+            const modal = document.getElementById('modal');
+            const numeroSorteadoSpan = document.getElementById('modal-numeroSorteado');
+            const resultadoSpan = document.getElementById('modal-resultado');
+            const ganhoSpan = document.getElementById('modal-ganho');
+
+            numeroSorteadoSpan.textContent = data.numeroSorteado;
+            resultadoSpan.textContent = data.resultado;
+            ganhoSpan.textContent = data.ganho.toFixed(2);
+
+            modal.style.display = 'block';
+        }
+
+        
+        function fecharModal() {
+            const modal = document.getElementById('modal');
+            modal.style.display = 'none';
+        }
+
+       async function realizarAposta() {
+            const valorApostado = document.getElementById('valor').value;
+            const tipoAposta = document.getElementById('tipo').value;
+
+            try {
+                // Faz a solicitação para a API
+                const response = await fetch(`/aposta?valor=${valorApostado}&tipo=${tipoAposta}`);
+                const data = await response.json();
+
+                const resultadoDiv = document.getElementById('resultado');
+                resultadoDiv.innerHTML = ''; // Limpa o conteúdo anterior
+                exibirModal(data); // Exibe o modal com os resultados da aposta
+
+                // Atualiza os contadores de ganhos e perdas
+                if (data.resultado === 'Ganhou!') {
+                    contadorGanhos++;
+                } else {
+                    contadorPerdas++;
+                }
+                atualizarContadores();
+            } catch (error) {
+                console.error('Erro ao realizar a aposta:', error);
+            }
+        }
+    </script>
+</body>
+</html>
